@@ -383,7 +383,7 @@
 <div class="bg-layer"></div>
 <div id="dragGhost"></div>
 
-<div class="app">
+<div class="app" id="mainApp" style="display:none;">
   <div class="user-bar" id="userBar" style="display:none;"><div class="sync-indicator"><div class="sync-dot" id="syncDot"></div><span id="syncLabel">Synced</span></div><span class="user-email" id="userEmail"></span><button class="sign-out-btn" onclick="signOut()">Sign out</button></div>
   <div class="header">
     <div class="brand">
@@ -657,12 +657,14 @@ supa.auth.onAuthStateChange(async (event, session)=>{
   if(session?.user){
     currentUser=session.user;
     document.getElementById('authScreen').style.display='none';
+    document.getElementById('mainApp').style.display='block';
     document.getElementById('userBar').style.display='flex';
     document.getElementById('userEmail').textContent=currentUser.email;
     await loadFromCloud();
   } else {
     currentUser=null;
     document.getElementById('authScreen').style.display='flex';
+    document.getElementById('mainApp').style.display='none';
     document.getElementById('userBar').style.display='none';
   }
 });
