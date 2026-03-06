@@ -505,12 +505,14 @@ const TODAY=new Date(2026,2,5);
 const SUPA_URL = 'https://xaqmzibacuflpvjkzuuz.supabase.co';
 const SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhhcW16aWJhY3VmbHB2amt6dXV6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI3MTkzNzMsImV4cCI6MjA4ODI5NTM3M30.cSnw8KbO-SsPlD5NwhHmrOfLnq9nZoLs4VfXal8m9Is';
 
-// Use plain fetch for all DB calls — avoids Supabase JS client lock issues
+let _accessToken = null;
+
 async function dbGet(userId){
-  const session = (await supa.auth.getSession()).data.session;
-  const token = session?.access_token || SUPA_KEY;
   const res = await fetch(SUPA_URL+'/rest/v1/user_data?user_id=eq.'+userId+'&select=*', {
-    headers:{'apikey':SUPA_KEY,'Authorization':'Bearer '+token},
+    headers:{
+      'apikey':SUPA_KEY,
+      'Authorization':'Bearer '+(_accessToken||SUPA_KEY)
+    },
     signal: AbortSignal.timeout(8000)
   });
   if(!res.ok) throw new Error('GET failed: '+res.status);
@@ -518,13 +520,11 @@ async function dbGet(userId){
 }
 
 async function dbSave(userId, payload){
-  const session = (await supa.auth.getSession()).data.session;
-  const token = session?.access_token || SUPA_KEY;
   const res = await fetch(SUPA_URL+'/rest/v1/user_data', {
     method:'POST',
     headers:{
       'apikey':SUPA_KEY,
-      'Authorization':'Bearer '+token,
+      'Authorization':'Bearer '+(_accessToken||SUPA_KEY),
       'Content-Type':'application/json',
       'Prefer':'resolution=merge-duplicates,return=minimal'
     },
@@ -656,6 +656,7 @@ function save(){
 supa.auth.onAuthStateChange(async (event, session)=>{
   if(session?.user){
     currentUser=session.user;
+    _accessToken=session.access_token;
     document.getElementById('authScreen').style.display='none';
     document.getElementById('mainApp').style.display='block';
     document.getElementById('userBar').style.display='flex';
