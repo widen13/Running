@@ -1,0 +1,1052 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Run Plan">
+<meta name="theme-color" content="#060d1f">
+<script>
+  // Inline PWA manifest
+  const manifest={name:"Run Plan",short_name:"Run Plan",display:"standalone",background_color:"#060d1f",theme_color:"#060d1f",orientation:"portrait",icons:[{src:"data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='22' fill='%23060d1f'/><text y='.9em' font-size='72' x='50%25' text-anchor='middle'>🏃</text></svg>",sizes:"512x512",type:"image/svg+xml"}]};
+  const blob=new Blob([JSON.stringify(manifest)],{type:'application/json'});
+  const link=document.createElement('link');
+  link.rel='manifest'; link.href=URL.createObjectURL(blob);
+  document.head.appendChild(link);
+</script>
+<link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='22' fill='%23060d1f'/><text y='.9em' font-size='72' x='50%' text-anchor='middle'>🏃</text></svg>">
+<title>Run Plan</title>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  /* ── THEME: Navy (default) ── */
+  :root, [data-theme="navy"] {
+    --bg:#060d1f; --card:#0b1630; --card2:#0f1e42; --card3:#162554; --card4:#1e3272;
+    --border:rgba(255,255,255,0.07); --border-hover:rgba(255,255,255,0.14);
+    --text:#e8edf8; --text-muted:#7a8aab; --text-dim:#4a5a7a;
+    --accent:#38bdf8; --done-bg:rgba(56,189,248,0.08); --done-border:rgba(56,189,248,0.3);
+    --orb1:rgba(30,50,114,0.5); --orb2:rgba(56,189,248,0.04);
+  }
+  [data-theme="forest"] {
+    --bg:#061209; --card:#0c1f0f; --card2:#122816; --card3:#18341c; --card4:#1e4022;
+    --border:rgba(255,255,255,0.06); --border-hover:rgba(150,255,150,0.14);
+    --text:#d4f0d8; --text-muted:#5e8f64; --text-dim:#2e5233;
+    --accent:#22c55e; --done-bg:rgba(34,197,94,0.09); --done-border:rgba(34,197,94,0.32);
+    --orb1:rgba(12,60,20,0.7); --orb2:rgba(34,197,94,0.05);
+  }
+  [data-theme="sunset"] {
+    --bg:#12100a; --card:#1e1a10; --card2:#2a2414; --card3:#362f1a; --card4:#433b22;
+    --border:rgba(255,220,120,0.08); --border-hover:rgba(255,220,120,0.18);
+    --text:#fef3d0; --text-muted:#a89050; --text-dim:#665830;
+    --accent:#f59e0b; --done-bg:rgba(245,158,11,0.09); --done-border:rgba(245,158,11,0.35);
+    --orb1:rgba(90,65,10,0.55); --orb2:rgba(245,158,11,0.05);
+  }
+  [data-theme="light"] {
+    --bg:#eef2f7; --card:#ffffff; --card2:#f5f7fa; --card3:#dde4ee; --card4:#c8d3e3;
+    --border:rgba(0,0,0,0.09); --border-hover:rgba(0,0,0,0.2);
+    --text:#0f172a; --text-muted:#475569; --text-dim:#64748b;
+    --accent:#2563eb; --done-bg:rgba(37,99,235,0.08); --done-border:rgba(37,99,235,0.35);
+    --orb1:rgba(148,163,184,0.25); --orb2:rgba(37,99,235,0.05);
+    --easy:#16a34a; --easy-bg:rgba(22,163,74,0.12);
+    --long:#4f46e5; --long-bg:rgba(79,70,229,0.1);
+    --interval:#c2410c; --interval-bg:rgba(194,65,12,0.1);
+  }
+  [data-theme="purple"] {
+    --bg:#0e0a1a; --card:#160f2a; --card2:#1e1538; --card3:#281c4a; --card4:#33245c;
+    --border:rgba(255,255,255,0.07); --border-hover:rgba(200,160,255,0.18);
+    --text:#ede8ff; --text-muted:#9080b8; --text-dim:#584880;
+    --accent:#a78bfa; --done-bg:rgba(167,139,250,0.08); --done-border:rgba(167,139,250,0.3);
+    --orb1:rgba(80,30,150,0.45); --orb2:rgba(167,139,250,0.05);
+  }
+  /* map old vars to theme vars */
+  :root,[data-theme]{
+    --navy-900:var(--bg); --navy-800:var(--card); --navy-700:var(--card2);
+    --navy-600:var(--card3); --navy-500:var(--card4); --sky:var(--accent);
+    --easy:#34d399; --easy-bg:rgba(52,211,153,0.1);
+    --long:#818cf8; --long-bg:rgba(129,140,248,0.1);
+    --interval:#fb923c; --interval-bg:rgba(251,146,60,0.1);
+    --race:#ff4757; --race-bg:rgba(255,71,87,0.12);
+  }
+  /* theme switcher */
+  .theme-switcher{display:flex;align-items:center;gap:7px;}
+  .theme-btn{width:22px;height:22px;border-radius:50%;border:2.5px solid transparent;cursor:pointer;transition:transform 0.18s,border-color 0.18s;flex-shrink:0;outline:none;}
+  .theme-btn:hover{transform:scale(1.25);}
+  .theme-btn.active{border-color:var(--text);box-shadow:0 0 0 2px var(--accent);transform:scale(1.2);}
+  .theme-label{font-size:11px;color:var(--text-dim);letter-spacing:0.5px;}
+  body { font-family:'Outfit',sans-serif; background:var(--bg); color:var(--text); min-height:100vh; overflow-x:hidden; user-select:none; padding-top:env(safe-area-inset-top); padding-bottom:env(safe-area-inset-bottom); }
+  .bg-layer { position:fixed; inset:0; pointer-events:none; z-index:0; overflow:hidden; }
+  .bg-layer::before { content:''; position:absolute; width:800px; height:800px; border-radius:50%; background:radial-gradient(circle,var(--orb1,rgba(30,50,114,0.5)) 0%,transparent 70%); top:-200px; right:-200px; }
+  .bg-layer::after { content:''; position:absolute; width:600px; height:600px; border-radius:50%; background:radial-gradient(circle,var(--orb2,rgba(56,189,248,0.04)) 0%,transparent 70%); bottom:100px; left:-100px; }
+  .app { position:relative; z-index:1; max-width:1140px; margin:0 auto; padding:40px 24px 100px; }
+  .header { display:flex; align-items:center; justify-content:space-between; margin-bottom:48px; gap:24px; flex-wrap:wrap; }
+  .brand { display:flex; align-items:center; gap:16px; }
+  .brand-icon { width:52px; height:52px; background:linear-gradient(135deg,var(--sky) 0%,#6366f1 100%); border-radius:16px; display:flex; align-items:center; justify-content:center; font-size:24px; box-shadow:0 8px 32px rgba(56,189,248,0.25); flex-shrink:0; }
+  .brand-text h1 { font-family:'Playfair Display',serif; font-size:28px; font-weight:700; letter-spacing:-0.5px; background:linear-gradient(135deg,#e8edf8 0%,var(--sky) 100%); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; line-height:1.1; }
+  .brand-text p { font-size:13px; color:var(--text-muted); font-weight:400; margin-top:2px; }
+  .month-nav { display:flex; align-items:center; background:var(--navy-700); border:1px solid var(--border); border-radius:14px; padding:4px; }
+  .nav-btn { background:transparent; border:none; color:var(--text-muted); width:38px; height:38px; border-radius:10px; cursor:pointer; font-size:16px; display:flex; align-items:center; justify-content:center; transition:all 0.18s; font-weight:600; }
+  .nav-btn:hover { background:var(--navy-500); color:var(--text); }
+  .month-label { font-size:15px; font-weight:600; color:var(--text); min-width:148px; text-align:center; }
+  .meta-bar { display:flex; align-items:center; margin-bottom:20px; gap:12px; flex-wrap:wrap; justify-content:space-between; }
+  .legend { display:flex; gap:6px; flex-wrap:wrap; }
+  .legend-chip { display:flex; align-items:center; gap:6px; font-size:12px; font-weight:500; color:var(--text-muted); background:var(--navy-700); border:1px solid var(--border); border-radius:20px; padding:5px 11px; }
+  .legend-dot { width:7px; height:7px; border-radius:50%; flex-shrink:0; }
+  .drag-hint { font-size:12px; color:var(--text-dim); display:flex; align-items:center; gap:6px; background:var(--navy-700); border:1px solid var(--border); border-radius:20px; padding:5px 12px; }
+  .weekdays { display:grid; grid-template-columns:repeat(7,1fr); gap:8px; margin-bottom:8px; }
+  .weekday { text-align:center; font-size:11px; font-weight:700; color:var(--text-dim); letter-spacing:1.8px; padding:6px 0; text-transform:uppercase; }
+  .calendar-grid { display:grid; grid-template-columns:repeat(7,1fr); gap:8px; }
+  .day-cell { background:var(--navy-800); border:1px solid var(--border); border-radius:16px; min-height:128px; padding:12px; position:relative; overflow:hidden; transition:border-color 0.2s,box-shadow 0.2s,background 0.2s,transform 0.15s; animation:fadeIn 0.35s ease both; }
+  .day-cell::before { content:''; position:absolute; top:0; left:12px; right:12px; height:1px; background:linear-gradient(90deg,transparent,rgba(255,255,255,0.06),transparent); }
+  .day-cell.other-month { background:var(--bg); border-color:var(--border); opacity:0.45; }
+  .day-cell.other-month .day-number { color:var(--text-dim); }
+  [data-theme="light"] .day-cell.other-month { background:#dde4ee; opacity:0.6; }
+  [data-theme="light"] .day-cell.other-month .day-number { color:#94a3b8; }
+  .day-cell.other-month.drag-over { opacity:1; }
+  .day-cell.today { border-color:var(--sky); background:var(--navy-700); box-shadow:0 0 0 1px rgba(56,189,248,0.15) inset,0 8px 32px rgba(56,189,248,0.08); }
+  .day-cell.completed { background:var(--done-bg); border-color:var(--done-border); }
+  .day-cell.drag-over { border-color:var(--sky)!important; background:rgba(56,189,248,0.08)!important; box-shadow:0 0 0 2px rgba(56,189,248,0.25)!important; transform:scale(1.02); }
+  .day-cell.drag-over.occupied { border-color:#f87171!important; background:rgba(248,113,113,0.06)!important; box-shadow:0 0 0 2px rgba(248,113,113,0.2)!important; }
+  .day-number { font-size:13px; font-weight:600; color:var(--text-dim); display:flex; align-items:center; justify-content:space-between; margin-bottom:9px; }
+  .today .day-number { color:var(--sky); }
+  .today-badge { font-size:9px; font-weight:700; letter-spacing:0.8px; background:var(--sky); color:var(--navy-900); border-radius:6px; padding:2px 7px; }
+  .done-check { width:20px; height:20px; background:var(--sky); border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:11px; color:var(--navy-900); font-weight:800; box-shadow:0 2px 8px rgba(56,189,248,0.4); flex-shrink:0; }
+  .training-pill { border-radius:10px; padding:8px 10px; position:relative; overflow:hidden; cursor:grab; transition:opacity 0.15s,transform 0.15s,box-shadow 0.15s; }
+  .training-pill:hover { transform:translateY(-1px); box-shadow:0 4px 16px rgba(0,0,0,0.3); }
+  .training-pill.dragging { opacity:0.3; transform:scale(0.96); cursor:grabbing; }
+  .training-pill::before { content:''; position:absolute; left:0; top:0; bottom:0; width:3px; border-radius:3px 0 0 3px; }
+  .training-pill.easy { background:var(--easy-bg); } .training-pill.easy::before { background:var(--easy); }
+  .training-pill.long { background:var(--long-bg); } .training-pill.long::before { background:var(--long); }
+  .training-pill.interval { background:var(--interval-bg); } .training-pill.interval::before { background:var(--interval); }
+  [data-theme="light"] .training-pill.easy { background:rgba(22,163,74,0.12); }
+  [data-theme="light"] .training-pill.easy::before { background:#16a34a; }
+  [data-theme="light"] .training-pill.easy .pill-type,
+  [data-theme="light"] .training-pill.easy .pill-name { color:#15803d; }
+  [data-theme="light"] .training-pill.long { background:rgba(79,70,229,0.1); }
+  [data-theme="light"] .training-pill.long::before { background:#4f46e5; }
+  [data-theme="light"] .training-pill.long .pill-type,
+  [data-theme="light"] .training-pill.long .pill-name { color:#4338ca; }
+  [data-theme="light"] .training-pill.interval { background:rgba(194,65,12,0.12); }
+  [data-theme="light"] .training-pill.interval::before { background:#c2410c; }
+  [data-theme="light"] .training-pill.interval .pill-type,
+  [data-theme="light"] .training-pill.interval .pill-name { color:#b45309; }
+  .training-pill.race { background:var(--race-bg); box-shadow:0 0 16px rgba(255,71,87,0.15); animation:racePulse 2.5s ease-in-out infinite; }
+  .training-pill.race::before { background:linear-gradient(180deg,#ff4757,#ff6b35); }
+  @keyframes racePulse { 0%,100%{box-shadow:0 0 10px rgba(255,71,87,0.15);} 50%{box-shadow:0 0 22px rgba(255,71,87,0.35);} }
+  .training-pill.race .pill-type { color:var(--race); }
+  .training-pill.race .pill-name { color:var(--race); font-weight:800; letter-spacing:0.3px; }
+  .pill-type { font-size:9px; font-weight:700; letter-spacing:1.4px; text-transform:uppercase; opacity:0.6; display:flex; align-items:center; gap:4px; margin-bottom:2px; }
+  .training-pill.easy .pill-type { color:var(--easy); } .training-pill.long .pill-type { color:var(--long); } .training-pill.interval .pill-type { color:var(--interval); }
+  .pill-drag-icon { font-size:10px; opacity:0.7; }
+  .pill-name { display:block; font-size:12.5px; font-weight:700; line-height:1.2; }
+  .training-pill.easy .pill-name { color:var(--easy); } .training-pill.long .pill-name { color:var(--long); } .training-pill.interval .pill-name { color:var(--interval); }
+  .pill-detail { display:block; font-size:10.5px; font-weight:400; color:var(--text-muted); margin-top:2px; }
+  .cell-comment { font-size:10px; color:var(--text-dim); margin-top:6px; font-style:italic; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .drop-zone-label { font-size:10px; color:rgba(56,189,248,0.4); text-align:center; margin-top:6px; display:none; letter-spacing:0.5px; }
+  .drag-over .drop-zone-label { display:block; }
+  #dragGhost { position:fixed; pointer-events:none; z-index:9999; padding:9px 13px; border-radius:11px; font-family:'Outfit',sans-serif; font-size:12px; font-weight:700; white-space:nowrap; box-shadow:0 16px 48px rgba(0,0,0,0.6); transform:rotate(-2deg) scale(1.06); display:none; }
+  #dragGhost.easy { background:#0d2b20; color:var(--easy); border:1.5px solid var(--easy); }
+  #dragGhost.long { background:#131528; color:var(--long); border:1.5px solid var(--long); }
+  #dragGhost.interval { background:#2a1508; color:var(--interval); border:1.5px solid var(--interval); }
+  #dragGhost.race { background:#2a0a0d; color:var(--race); border:1.5px solid var(--race); }
+  .modal-overlay { position:fixed; inset:0; background:rgba(4,8,20,0.8); backdrop-filter:blur(12px); z-index:200; display:flex; align-items:center; justify-content:center; padding:20px; opacity:0; pointer-events:none; transition:opacity 0.25s; }
+  .modal-overlay.open { opacity:1; pointer-events:all; }
+  .modal { background:var(--navy-800); border:1px solid var(--border-hover); border-radius:24px; width:100%; max-width:500px; max-height:88vh; overflow-y:auto; padding:0; transform:translateY(20px) scale(0.97); transition:transform 0.28s cubic-bezier(0.34,1.56,0.64,1); box-shadow:0 40px 100px rgba(0,0,0,0.7),0 0 0 1px rgba(255,255,255,0.04) inset; }
+  .modal-overlay.open .modal { transform:translateY(0) scale(1); }
+  .modal-close-x {
+    position:absolute; top:14px; right:14px;
+    width:32px; height:32px; border-radius:50%;
+    background:var(--card3); border:1px solid var(--border);
+    color:var(--text-muted); font-size:16px; line-height:1;
+    display:flex; align-items:center; justify-content:center;
+    cursor:pointer; transition:all 0.18s; z-index:10;
+  }
+  .modal-close-x:hover { background:var(--card4); color:var(--text); border-color:var(--border-hover); transform:scale(1.08); }
+  .modal-band.easy { background:linear-gradient(90deg,var(--easy),#6ee7b7); } .modal-band.long { background:linear-gradient(90deg,var(--long),#c7d2fe); } .modal-band.interval { background:linear-gradient(90deg,var(--interval),#fcd34d); } .modal-band.race { background:linear-gradient(90deg,#ff4757,#ff6b35,#ffd700); }
+  .modal-inner { padding:28px 32px 32px; }
+  .modal-header { margin-bottom:24px; }
+  .modal-date { font-size:12px; color:var(--text-muted); font-weight:500; margin-bottom:6px; }
+  .modal-title { font-family:'Playfair Display',serif; font-size:32px; font-weight:700; line-height:1.1; letter-spacing:-0.5px; }
+  .modal-title.easy { color:var(--easy); } .modal-title.long { color:var(--long); } .modal-title.interval { color:var(--interval); } .modal-title.race { color:var(--race); }
+  .modal-section { margin-bottom:22px; }
+  .modal-label { font-size:10px; font-weight:700; letter-spacing:1.8px; color:var(--text-dim); text-transform:uppercase; margin-bottom:10px; display:flex; align-items:center; gap:8px; }
+  .modal-label::after { content:''; flex:1; height:1px; background:var(--border); }
+  .modal-desc { font-size:14px; line-height:1.7; color:var(--text); opacity:0.85; }
+  .interval-steps { display:flex; flex-direction:column; gap:6px; }
+  .interval-rep { display:flex; align-items:center; gap:12px; background:var(--navy-700); border:1px solid var(--border); border-radius:12px; padding:10px 14px; }
+  .rep-num { font-size:17px; font-weight:800; color:var(--interval); min-width:26px; font-family:'Playfair Display',serif; }
+  .rep-divider { width:1px; height:28px; background:var(--border); flex-shrink:0; }
+  .rep-info { flex:1; }
+  .rep-work { font-size:13.5px; font-weight:600; color:var(--text); }
+  .rep-rest { font-size:11px; color:var(--text-muted); margin-top:2px; }
+  .duration-badge { display:inline-flex; align-items:center; gap:8px; background:var(--navy-700); border:1px solid var(--border); border-radius:10px; padding:10px 16px; font-size:14px; font-weight:600; color:var(--text); }
+  textarea.modal-comment { width:100%; background:var(--navy-700); border:1px solid var(--border); border-radius:12px; padding:13px 15px; color:var(--text); font-family:'Outfit',sans-serif; font-size:16px; resize:vertical; min-height:76px; outline:none; transition:border-color 0.2s,box-shadow 0.2s; line-height:1.55; user-select:text; }
+  textarea.modal-comment:focus { border-color:rgba(56,189,248,0.4); box-shadow:0 0 0 3px rgba(56,189,248,0.06); }
+  textarea.modal-comment::placeholder { color:var(--text-dim); }
+  .modal-actions { display:flex; gap:10px; margin-top:8px; flex-wrap:wrap; }
+  .btn { flex:1; min-width:120px; padding:13px 18px; border-radius:12px; border:1px solid var(--border); font-family:'Outfit',sans-serif; font-size:14px; font-weight:600; cursor:pointer; transition:all 0.18s; }
+  .btn-complete { background:linear-gradient(135deg,var(--sky) 0%,#6366f1 100%); color:#fff; border-color:transparent; box-shadow:0 4px 20px rgba(56,189,248,0.25); }
+  .btn-complete:hover { box-shadow:0 6px 28px rgba(56,189,248,0.4); transform:translateY(-1px); }
+  .btn-uncomplete { background:transparent; color:var(--sky); border-color:rgba(56,189,248,0.35); }
+  .btn-uncomplete:hover { background:rgba(56,189,248,0.07); }
+  .btn-close { background:var(--navy-700); color:var(--text-muted); }
+  .btn-close:hover { color:var(--text); border-color:var(--border-hover); }
+  .btn-remove { background:transparent; color:#f87171; border-color:rgba(248,113,113,0.3); flex:0 0 auto; }
+  .btn-remove:hover { background:rgba(248,113,113,0.08); border-color:#f87171; }
+
+  /* Add button on empty cells */
+  .add-btn {
+    position:absolute; bottom:10px; right:10px;
+    width:26px; height:26px; border-radius:8px;
+    background:rgba(255,255,255,0.04); border:1px dashed rgba(255,255,255,0.1);
+    color:var(--text-dim); font-size:18px; line-height:1;
+    display:flex; align-items:center; justify-content:center;
+    cursor:pointer; transition:all 0.18s;
+    font-weight:300;
+  }
+  .day-cell:hover .add-btn { background:rgba(56,189,248,0.1); border-color:rgba(56,189,248,0.35); color:var(--sky); }
+
+  /* Add modal type picker */
+  .type-picker { display:flex; flex-direction:column; gap:10px; }
+  .type-option {
+    display:flex; align-items:center; gap:14px;
+    background:var(--navy-700); border:1.5px solid var(--border);
+    border-radius:14px; padding:14px 16px; cursor:pointer;
+    transition:all 0.18s;
+  }
+  .type-option:hover { border-color:var(--border-hover); transform:translateX(3px); }
+  .type-option.easy:hover { border-color:var(--easy); background:var(--easy-bg); }
+  .type-option.long:hover { border-color:var(--long); background:var(--long-bg); }
+  .type-option.interval:hover { border-color:var(--interval); background:var(--interval-bg); }
+  .type-option.race { border-color:rgba(255,71,87,0.2); }
+  .type-option.race:hover { border-color:var(--race); background:var(--race-bg); }
+  .type-option.race .type-name { color:var(--race); }
+  .type-option.race .type-icon { background:var(--race-bg); }
+  .type-icon { width:36px; height:36px; border-radius:10px; display:flex; align-items:center; justify-content:center; font-size:18px; flex-shrink:0; }
+  .type-option.easy .type-icon { background:var(--easy-bg); }
+  .type-option.long .type-icon { background:var(--long-bg); }
+  .type-option.interval .type-icon { background:var(--interval-bg); }
+  .type-info { flex:1; }
+  .type-name { font-size:14px; font-weight:700; }
+  .type-option.easy .type-name { color:var(--easy); }
+  .type-option.long .type-name { color:var(--long); }
+  .type-option.interval .type-name { color:var(--interval); }
+  .type-sub { font-size:12px; color:var(--text-muted); margin-top:2px; }
+  .type-arrow { color:var(--text-dim); font-size:16px; }
+
+  /* Custom interval builder */
+  .custom-builder { display:flex; flex-direction:column; gap:12px; }
+  .builder-field { display:flex; flex-direction:column; gap:6px; }
+  .builder-label { font-size:11px; font-weight:700; letter-spacing:1.2px; color:var(--text-dim); text-transform:uppercase; }
+  .builder-input {
+    background:var(--navy-700); border:1px solid var(--border); border-radius:10px;
+    padding:10px 13px; color:var(--text); font-family:'Outfit',sans-serif; font-size:16px;
+    outline:none; transition:border-color 0.2s,box-shadow 0.2s; width:100%;
+    user-select:text; -webkit-appearance:none;
+  }
+  .builder-input:focus { border-color:rgba(56,189,248,0.4); box-shadow:0 0 0 3px rgba(56,189,248,0.06); }
+  .builder-input::placeholder { color:var(--text-dim); }
+  .reps-list { display:flex; flex-direction:column; gap:6px; }
+  .rep-row {
+    display:grid; grid-template-columns:20px 1fr 1fr 32px; gap:8px; align-items:center;
+  }
+  .rep-row-num { font-size:11px; font-weight:700; color:var(--interval); min-width:18px; }
+  .rep-delete {
+    width:28px; height:28px; border-radius:8px; border:1px solid rgba(248,113,113,0.25);
+    background:transparent; color:#f87171; cursor:pointer; display:flex; align-items:center;
+    justify-content:center; font-size:14px; transition:all 0.15s; flex-shrink:0;
+  }
+  .rep-delete:hover { background:rgba(248,113,113,0.1); border-color:#f87171; }
+  .add-rep-btn {
+    background:transparent; border:1.5px dashed rgba(251,146,60,0.3); border-radius:10px;
+    color:var(--interval); font-family:'Outfit',sans-serif; font-size:13px; font-weight:600;
+    padding:9px; cursor:pointer; transition:all 0.18s; width:100%;
+  }
+  .add-rep-btn:hover { border-color:var(--interval); background:var(--interval-bg); }
+  .interval-picker { display:flex; flex-direction:column; gap:8px; }
+  .interval-option {
+    display:flex; align-items:center; justify-content:space-between;
+    background:var(--navy-700); border:1.5px solid var(--border);
+    border-radius:12px; padding:12px 14px; cursor:pointer; transition:all 0.18s;
+  }
+  .interval-option:hover { border-color:var(--interval); background:var(--interval-bg); }
+  .interval-option-name { font-size:13px; font-weight:700; color:var(--interval); }
+  .interval-option-desc { font-size:11px; color:var(--text-muted); margin-top:2px; }
+  .back-btn {
+    background:transparent; border:none; color:var(--text-muted);
+    font-family:'Outfit',sans-serif; font-size:13px; cursor:pointer;
+    display:flex; align-items:center; gap:6px; padding:0; margin-bottom:16px;
+    transition:color 0.15s;
+  }
+  .back-btn:hover { color:var(--text); }
+  .modal::-webkit-scrollbar { width:4px; } .modal::-webkit-scrollbar-thumb { background:var(--navy-600); border-radius:4px; }
+  #toast { position:fixed; bottom:32px; left:50%; transform:translateX(-50%) translateY(80px); background:var(--navy-600); border:1px solid var(--border-hover); border-radius:12px; padding:12px 20px; font-size:13px; font-weight:500; color:var(--text); z-index:500; transition:transform 0.3s cubic-bezier(0.34,1.56,0.64,1),opacity 0.3s; opacity:0; white-space:nowrap; pointer-events:none; box-shadow:0 8px 32px rgba(0,0,0,0.4); }
+  #toast.show { transform:translateX(-50%) translateY(0); opacity:1; }
+  @keyframes fadeIn { from{opacity:0;transform:translateY(8px);} to{opacity:1;transform:translateY(0);} }
+  /* ── MOBILE ── */
+  @media(max-width:640px){
+    .app { padding:16px 12px 100px; }
+    .header { margin-bottom:24px; gap:12px; }
+    .brand-icon { width:40px; height:40px; font-size:20px; border-radius:12px; }
+    .brand-text h1 { font-size:22px; }
+    .brand-text p { display:none; }
+    .month-nav { padding:3px; }
+    .month-label { min-width:120px; font-size:14px; }
+    .nav-btn { width:34px; height:34px; }
+    /* Theme switcher row */
+    #themeSwitcherRow { margin-bottom:12px; }
+    /* Compact weekday labels */
+    .weekday { font-size:9px; letter-spacing:0.8px; }
+    /* Calendar cells - compact */
+    .calendar-grid { gap:4px; }
+    .day-cell { min-height:72px; padding:7px 6px; border-radius:10px; }
+    .day-cell.other-month { opacity:0.3; }
+    .day-number { font-size:11px; margin-bottom:5px; }
+    .today-badge { font-size:8px; padding:1px 5px; }
+    .done-check { width:16px; height:16px; font-size:9px; }
+    /* Pill - very compact on mobile */
+    .training-pill { padding:4px 6px; border-radius:7px; }
+    .pill-type { font-size:8px; letter-spacing:0.5px; }
+    .pill-drag-icon { display:none; }
+    .pill-name { font-size:10.5px; }
+    .pill-detail { display:none; }
+    .cell-comment { display:none; }
+    .add-btn { width:20px; height:20px; font-size:14px; border-radius:6px; bottom:5px; right:5px; }
+    /* Legend */
+    .meta-bar { margin-bottom:12px; gap:6px; }
+    .legend-chip { font-size:10px; padding:4px 8px; }
+    .drag-hint { display:none; }
+    /* Modal - full screen on mobile */
+    .modal-overlay { padding:0; align-items:flex-end; }
+    .modal { border-radius:24px 24px 0 0; max-height:92vh; }
+    .modal-inner { padding:20px 20px 40px; }
+    .modal-title { font-size:24px; }
+    .modal-close-x { top:12px; right:12px; width:36px; height:36px; font-size:18px; }
+    .btn { font-size:15px; padding:14px 12px; }
+    /* Builder */
+    .rep-row { grid-template-columns:18px 1fr 1fr 28px; gap:5px; }
+    .builder-input { font-size:16px !important; padding:10px; }
+  }
+  /* Active tap states for mobile */
+  @media(hover:none){
+    .training-pill:active { transform:scale(0.97); opacity:0.8; }
+    .btn:active { transform:scale(0.97); opacity:0.9; }
+    .type-option:active { transform:translateX(4px); }
+    .interval-option:active { transform:translateX(4px); }
+    .day-cell:active { transform:scale(0.98); }
+  }
+</style>
+</head>
+<body>
+<div class="bg-layer"></div>
+<div id="dragGhost"></div>
+
+<div class="app">
+  <div class="header">
+    <div class="brand">
+      <div class="brand-icon">🏃</div>
+      <div class="brand-text"><h1>Run Plan</h1><p>Training calendar · Stockholm 2026</p></div>
+    </div>
+    <div class="month-nav">
+      <button class="nav-btn" onclick="changeMonth(-1)">&#8592;</button>
+      <div class="month-label" id="monthLabel"></div>
+      <button class="nav-btn" onclick="changeMonth(1)">&#8594;</button>
+    </div>
+  </div>
+  <!-- Theme switcher -->
+  <div style="display:flex;align-items:center;justify-content:flex-end;margin-bottom:20px;gap:10px;">
+    <span class="theme-label">THEME</span>
+    <div class="theme-switcher" id="themeSwitcher">
+      <button class="theme-btn active" data-theme="navy"   style="background:linear-gradient(135deg,#0b1630 40%,#38bdf8)" title="Navy" onclick="setTheme('navy')"></button>
+      <button class="theme-btn"        data-theme="forest" style="background:linear-gradient(135deg,#0c1f0f 40%,#22c55e)" title="Forest" onclick="setTheme('forest')"></button>
+      <button class="theme-btn"        data-theme="sunset" style="background:linear-gradient(135deg,#1e1a10 40%,#f59e0b)" title="Amber" onclick="setTheme('sunset')"></button>
+      <button class="theme-btn"        data-theme="light"  style="background:linear-gradient(135deg,#eef2f7 40%,#2563eb)" title="Light" onclick="setTheme('light')"></button>
+      <button class="theme-btn"        data-theme="purple" style="background:linear-gradient(135deg,#160f2a 40%,#a78bfa)" title="Purple" onclick="setTheme('purple')"></button>
+    </div>
+  </div>
+  <div class="meta-bar">
+    <div class="legend">
+      <div class="legend-chip"><div class="legend-dot" style="background:var(--easy)"></div> Easy Z2</div>
+      <div class="legend-chip"><div class="legend-dot" style="background:var(--long)"></div> Long Z2</div>
+      <div class="legend-chip"><div class="legend-dot" style="background:var(--interval)"></div> Intervals</div>
+      <div class="legend-chip"><div class="legend-dot" style="background:var(--sky)"></div> Completed</div>
+    </div>
+    <div class="drag-hint">⠿ Drag sessions to reschedule</div>
+  </div>
+  <div class="weekdays">
+    <div class="weekday">Mon</div><div class="weekday">Tue</div><div class="weekday">Wed</div>
+    <div class="weekday">Thu</div><div class="weekday">Fri</div><div class="weekday">Sat</div><div class="weekday">Sun</div>
+  </div>
+  <div class="calendar-grid" id="calendarGrid"></div>
+</div>
+
+<div class="modal-overlay" id="modalOverlay" onclick="closeModalOutside(event)">
+  <div class="modal" style="position:relative;">
+    <button class="modal-close-x" onclick="saveAndClose()" title="Close">&#x2715;</button>
+    <div class="modal-band" id="modalBand"></div>
+    <div class="modal-inner">
+      <div class="modal-header">
+        <div class="modal-date" id="modalDate"></div>
+        <div class="modal-title" id="modalTitle"></div>
+      </div>
+      <div id="modalBody"></div>
+      <div class="modal-actions" id="modalActions"></div>
+    </div>
+  </div>
+</div>
+<div id="toast"></div>
+
+<script>
+// ─── THEME ───────────────────────────────────────────────────────────────────
+function setTheme(theme){
+  document.documentElement.setAttribute("data-theme",theme);
+  document.querySelectorAll(".theme-btn").forEach(b=>b.classList.toggle("active",b.dataset.theme===theme));
+  try{localStorage.setItem("rp_theme",theme);}catch(e){}
+}
+(function(){
+  let t="navy";
+  try{t=localStorage.getItem("rp_theme")||"navy";}catch(e){}
+  document.documentElement.setAttribute("data-theme",t);
+  document.addEventListener("DOMContentLoaded",()=>{
+    document.querySelectorAll(".theme-btn").forEach(b=>b.classList.toggle("active",b.dataset.theme===t));
+  });
+})();
+const INTERVALS=[
+  {id:1,name:"8 \xD7 3 min",shortName:"8\xD73'",desc:"8 reps of 3 minutes at hard effort (zone 4\u20135). Keep the rest short \u2014 it's supposed to be uncomfortable.",reps:Array(8).fill(null).map(()=>({work:"3 min hard",rest:"1 min easy"}))},
+  {id:2,name:"4 \xD7 7 min",shortName:"4\xD77'",desc:"4 longer threshold intervals at zone 4. Longer rest to maintain quality across all reps.",reps:Array(4).fill(null).map(()=>({work:"7 min threshold",rest:"2 min easy"}))},
+  {id:3,name:"6 \xD7 5 min",shortName:"6\xD75'",desc:"6 reps of 5 minutes at zone 4. Classic cruise interval session \u2014 controlled aggression.",reps:Array(6).fill(null).map(()=>({work:"5 min hard",rest:"1 min easy"}))},
+  {id:4,name:"4 \xD7 8 min",shortName:"4\xD78'",desc:"4 reps of 8 minutes \u2014 long threshold efforts. Focus on controlled, even pacing.",reps:Array(4).fill(null).map(()=>({work:"8 min threshold",rest:"2 min easy"}))},
+  {id:5,name:"10 \xD7 3 min",shortName:"10\xD73'",desc:"High volume short intervals. 10 reps \u2014 aggressive but with manageable efforts between.",reps:Array(10).fill(null).map(()=>({work:"3 min hard",rest:"1 min easy"}))},
+  {id:6,name:"Descending Ladder",shortName:"Ladder \u2193",desc:"Descending distance ladder. Each rep gets shorter \u2014 pace should pick up with each effort.",reps:[{work:"2 km",rest:"1 min easy"},{work:"1.6 km",rest:"1 min easy"},{work:"1.2 km",rest:"1 min easy"},{work:"0.8 km",rest:"1 min easy"},{work:"0.4 km",rest:"\u2014"}]},
+  {id:7,name:"Pyramid",shortName:"Pyramid \u2191\u2193",desc:"Classic pyramid \u2014 build up then come back down. Pace the first half, push the second.",reps:[{work:"400 m",rest:"1 min easy"},{work:"800 m",rest:"1 min easy"},{work:"1200 m",rest:"1 min easy"},{work:"1600 m",rest:"1 min easy"},{work:"1200 m",rest:"1 min easy"},{work:"800 m",rest:"1 min easy"},{work:"400 m",rest:"\u2014"}]},
+  {id:8,name:"6 \xD7 5 min",shortName:"6\xD75'",desc:"Return to 6x5 min \u2014 body should be adapted. Aim to feel stronger and more controlled than session 3.",reps:Array(6).fill(null).map(()=>({work:"5 min hard",rest:"1 min easy"}))},
+  {id:9,name:"6 \xD7 1 km Track",shortName:"6\xD71km",desc:"Track session: 6 x 1 km. Use the track for precise splits and even pacing.",reps:Array(6).fill(null).map(()=>({work:"1 km track",rest:"1 min easy"}))},
+  {id:10,name:"4 \xD7 8 min",shortName:"4\xD78'",desc:"Second 4x8 min block. Your fitness should show here \u2014 push the pace compared to session 4.",reps:Array(4).fill(null).map(()=>({work:"8 min threshold",rest:"2 min easy"}))},
+  {id:11,name:"2km + 3\xD71km",shortName:"2km+3\xD71km",desc:"Mixed session: two 2 km efforts then three 1 km reps on the track. A real fitness test.",reps:[{work:"2 km",rest:"2 min easy"},{work:"2 km",rest:"2 min easy"},{work:"1 km track",rest:"1 min easy"},{work:"1 km track",rest:"1 min easy"},{work:"1 km track",rest:"\u2014"}]},
+];
+
+function dateKey(d){return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');}
+
+const WARMUP  = {work:'Warm-up · 10 min easy', rest:'Easy jog, build gradually', isWarmup:true};
+const COOLDOWN= {work:'Cool-down · 10 min easy', rest:'Easy jog, let heart rate drop', isCooldown:true};
+function withWU(reps){ return [WARMUP, ...reps, COOLDOWN]; }
+
+function buildSchedule(){
+  const s={};
+  const set=(date,tr)=>{s[dateKey(date)]={...tr};};
+  const weeks=[
+    {start:new Date(2026,2,2),interval:1},
+    {start:new Date(2026,2,9),interval:2},
+    {start:new Date(2026,2,16),interval:3,extra:4},
+    {start:new Date(2026,2,23),interval:5},
+    {start:new Date(2026,2,30),interval:6},
+    {start:new Date(2026,3,6),interval:7,extra:8},
+    {start:new Date(2026,3,13),interval:9},
+    {start:new Date(2026,3,20),interval:10,extra:11},
+    {start:new Date(2026,3,27),interval:null},
+    {start:new Date(2026,4,4),interval:null},
+  ];
+  weeks.forEach(w=>{
+    const d=n=>{const x=new Date(w.start);x.setDate(x.getDate()+n);return x;};
+    set(d(1),{type:'easy',name:'Easy Run',detail:'30-45 min zone 2',desc:'Easy aerobic run keeping heart rate in zone 2. Conversational pace. Focus on time on feet, not speed.',duration:'30-45 min'});
+    if(w.interval){const iv=INTERVALS[w.interval-1];set(d(3),{type:'interval',name:iv.name,detail:iv.shortName+' intervals',desc:iv.desc,reps:withWU(iv.reps)});}
+    else set(d(3),{type:'easy',name:'Easy Run',detail:'30-40 min zone 2 deload',desc:'Deload week - easy aerobic run. Keep it relaxed, enjoy the recovery.',duration:'30-40 min'});
+    set(d(5),{type:'long',name:'Long Run',detail:'1-2h zone 2',desc:'Long aerobic run in zone 2. Builds endurance and fat adaptation. Bring fluids for runs over 75 min.',duration:'1-2 hours'});
+    if(w.extra){const iv=INTERVALS[w.extra-1];set(d(6),{type:'interval',name:iv.name,detail:iv.shortName+' intervals',desc:iv.desc,reps:withWU(iv.reps)});}
+  });
+  return s;
+}
+
+const TODAY=new Date(2026,2,5);
+// ─── STATE ───────────────────────────────────────────────────────────────────
+let schedule={}, completedDays={}, comments={};
+
+function save(){
+  try{
+    localStorage.setItem('rp_sched_v2', JSON.stringify(schedule));
+    localStorage.setItem('rp_done', JSON.stringify(completedDays));
+    localStorage.setItem('rp_notes', JSON.stringify(comments));
+  }catch(e){}
+}
+
+function load(){
+  try{
+    const sv = localStorage.getItem('rp_sched_v2');
+    if(sv) schedule = JSON.parse(sv);
+    else schedule = buildSchedule();
+  }catch(e){ schedule = buildSchedule(); }
+  try{ completedDays = JSON.parse(localStorage.getItem('rp_done')||'{}'); }catch(e){}
+  try{ comments = JSON.parse(localStorage.getItem('rp_notes')||'{}'); }catch(e){}
+}
+
+load();
+
+let currentYear=2026,currentMonth=2,selectedKey=null;
+
+// Drag state
+let dragSrcKey=null,dragData=null,dragOverEl=null,isDragging=false,didDrag=false;
+let mdPos={x:0,y:0};
+const ghost=document.getElementById('dragGhost');
+
+function showGhost(tr,x,y){ghost.textContent=tr.name;ghost.className=tr.type;ghost.style.display='block';posGhost(x,y);}
+function posGhost(x,y){ghost.style.left=(x+16)+'px';ghost.style.top=(y-20)+'px';}
+function hideGhost(){ghost.style.display='none';}
+
+function render(){
+  const grid=document.getElementById('calendarGrid');
+  document.getElementById('monthLabel').textContent=new Date(currentYear,currentMonth,1).toLocaleString('en-US',{month:'long',year:'numeric'});
+  const firstDow=(new Date(currentYear,currentMonth,1).getDay()+6)%7;
+  const dim=new Date(currentYear,currentMonth+1,0).getDate();
+  const dip=new Date(currentYear,currentMonth,0).getDate();
+  const total=Math.ceil((firstDow+dim)/7)*7;
+  grid.innerHTML='';
+  for(let i=0;i<total;i++){
+    let day,mo=currentMonth,yr=currentYear,other=false;
+    if(i<firstDow){day=dip-firstDow+i+1;mo=currentMonth-1;if(mo<0){mo=11;yr=currentYear-1;}other=true;}
+    else if(i>=firstDow+dim){day=i-firstDow-dim+1;mo=currentMonth+1;if(mo>11){mo=0;yr=currentYear+1;}other=true;}
+    else day=i-firstDow+1;
+    const date=new Date(yr,mo,day);
+    const key=dateKey(date);
+    const tr=schedule[key];
+    const isToday=dateKey(date)===dateKey(TODAY);
+    const done=completedDays[key];
+    const cell=document.createElement('div');
+    let cls='day-cell';
+    if(other)cls+=' other-month';
+    if(isToday)cls+=' today';
+    if(done&&tr)cls+=' completed';
+    cell.className=cls;
+    cell.dataset.key=key;
+    cell.dataset.other=other?'1':'0';
+    cell.style.animationDelay=(i*0.012)+'s';
+    let html='<div class="day-number"><span>'+day+'</span>';
+    if(isToday)html+='<span class="today-badge">Today</span>';
+    if(done&&tr)html+='<span class="done-check">&#10003;</span>';
+    html+='</div>';
+    if(tr){
+      html+='<div class="training-pill '+tr.type+'" data-key="'+key+'"><span class="pill-type"><span class="pill-drag-icon">&#8285;</span> '+tr.type+'</span><span class="pill-name">'+tr.name+'</span><span class="pill-detail">'+tr.detail+'</span></div>';
+      if(comments[key])html+='<div class="cell-comment">&#128172; '+comments[key]+'</div>';
+    }
+    html+='<div class="drop-zone-label">Drop here</div>';
+    if(!tr) html+='<div class="add-btn" title="Add session">+</div>';
+    cell.innerHTML=html;
+
+    if(tr&&!other){
+      const pill=cell.querySelector('.training-pill');
+      // Desktop drag
+      pill.addEventListener('mousedown',function(e){
+        if(e.button!==0)return;
+        e.preventDefault();
+        dragSrcKey=key; dragData={...tr}; didDrag=false;
+        mdPos={x:e.clientX,y:e.clientY};
+      });
+      // Desktop click
+      pill.addEventListener('click',function(e){
+        if(!didDrag)openModal(key,date,tr);
+      });
+      // Mobile: long press to drag, tap to open
+      pill.addEventListener('touchstart',function(e){
+        const t=e.touches[0];
+        mdPos={x:t.clientX,y:t.clientY};
+        didDrag=false;
+        // Long press timer — only start drag after 450ms hold
+        longPressTimer=setTimeout(function(){
+          if(!didDrag){
+            dragSrcKey=key; dragData={...tr};
+            // Haptic if available
+            if(navigator.vibrate) navigator.vibrate(40);
+            pill.classList.add('dragging');
+            showGhost(dragData,mdPos.x,mdPos.y);
+            isDragging=true;
+          }
+        },450);
+      },{passive:true});
+      pill.addEventListener('touchend',function(e){
+        clearTimeout(longPressTimer);
+        if(!isDragging){
+          // It was a tap — open modal
+          openModal(key,date,tr);
+        }
+      });
+      pill.addEventListener('touchmove',function(e){
+        const t=e.touches[0];
+        const dx=t.clientX-mdPos.x, dy=t.clientY-mdPos.y;
+        // If finger moves more than 8px before long press fires — cancel drag, allow scroll
+        if(!isDragging && Math.sqrt(dx*dx+dy*dy)>8){
+          clearTimeout(longPressTimer);
+          dragSrcKey=null;
+        }
+      },{passive:true});
+    }
+    if(!tr){
+      cell.addEventListener('click',function(){
+        if(isDragging||didDrag)return;
+        openAddModal(key,date);
+      });
+    }
+    cell.addEventListener('mouseenter',function(){
+      if(!isDragging)return;
+      if(dragOverEl)dragOverEl.classList.remove('drag-over','occupied');
+      dragOverEl=cell;
+      cell.classList.add('drag-over');
+      if(schedule[key]&&key!==dragSrcKey)cell.classList.add('occupied');
+    });
+    cell.addEventListener('mouseleave',function(){
+      if(!isDragging)return;
+      cell.classList.remove('drag-over','occupied');
+      if(dragOverEl===cell)dragOverEl=null;
+    });
+    grid.appendChild(cell);
+  }
+}
+
+document.addEventListener('mousemove',function(e){
+  if(!dragSrcKey)return;
+  const dx=e.clientX-mdPos.x,dy=e.clientY-mdPos.y;
+  if(!isDragging&&Math.sqrt(dx*dx+dy*dy)>6){
+    isDragging=true;didDrag=true;
+    document.body.style.cursor='grabbing';
+    const sp=document.querySelector('.training-pill[data-key="'+dragSrcKey+'"]');
+    if(sp)sp.classList.add('dragging');
+    showGhost(dragData,e.clientX,e.clientY);
+  }
+  if(isDragging)posGhost(e.clientX,e.clientY);
+});
+
+let longPressTimer=null;
+document.addEventListener('touchmove',function(e){
+  if(!isDragging) return; // only intercept scroll if actively dragging
+  const t=e.touches[0];
+  posGhost(t.clientX,t.clientY);
+  const el=document.elementFromPoint(t.clientX,t.clientY);
+  const cell=el?.closest('.day-cell');
+  if(cell!==dragOverEl){
+    if(dragOverEl)dragOverEl.classList.remove('drag-over','occupied');
+    dragOverEl=cell||null;
+    if(dragOverEl){
+      dragOverEl.classList.add('drag-over');
+      const tKey=dragOverEl.dataset.key;
+      if(schedule[tKey]&&tKey!==dragSrcKey)dragOverEl.classList.add('occupied');
+    }
+  }
+  e.preventDefault();
+},{passive:false});
+
+document.addEventListener('mouseup',function(){
+  if(!dragSrcKey)return;
+  if(isDragging&&dragOverEl){
+    const tKey=dragOverEl.dataset.key;
+    if(tKey&&tKey!==dragSrcKey){
+      if(!schedule[tKey]){
+        schedule[tKey]={...dragData};
+        delete schedule[dragSrcKey];
+        if(completedDays[dragSrcKey]){completedDays[tKey]=true;delete completedDays[dragSrcKey];}
+        if(comments[dragSrcKey]){comments[tKey]=comments[dragSrcKey];delete comments[dragSrcKey];}
+        save();showToast('Moved to '+fmtKey(tKey));render();
+      } else {
+        showToast('That day already has a session',true);
+      }
+    }
+  }
+  const sp=document.querySelector('.training-pill[data-key="'+dragSrcKey+'"]');
+  if(sp)sp.classList.remove('dragging');
+  if(dragOverEl)dragOverEl.classList.remove('drag-over','occupied');
+  hideGhost();
+  isDragging=false;dragSrcKey=null;dragData=null;dragOverEl=null;
+  document.body.style.cursor='';
+  setTimeout(()=>{didDrag=false;},60);
+});
+
+document.addEventListener('touchend',function(){
+  clearTimeout(longPressTimer);
+  if(!dragSrcKey)return;
+  if(isDragging&&dragOverEl){
+    const tKey=dragOverEl.dataset.key;
+    if(tKey&&tKey!==dragSrcKey){
+      if(!schedule[tKey]){
+        schedule[tKey]={...dragData};
+        delete schedule[dragSrcKey];
+        if(completedDays[dragSrcKey]){completedDays[tKey]=true;delete completedDays[dragSrcKey];}
+        if(comments[dragSrcKey]){comments[tKey]=comments[dragSrcKey];delete comments[dragSrcKey];}
+        save();showToast('Moved to '+fmtKey(tKey));render();
+      } else {
+        showToast('That day already has a session',true);
+      }
+    }
+  }
+  const sp=document.querySelector('.training-pill[data-key="'+dragSrcKey+'"]');
+  if(sp)sp.classList.remove('dragging');
+  if(dragOverEl)dragOverEl.classList.remove('drag-over','occupied');
+  hideGhost();
+  isDragging=false;dragSrcKey=null;dragData=null;dragOverEl=null;
+  setTimeout(()=>{didDrag=false;},60);
+});
+
+function fmtKey(k){const d=new Date(k);return d.toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'});}
+
+let toastT;
+function showToast(msg,err){
+  const t=document.getElementById('toast');
+  t.textContent=(err?'  ':'  ✓  ')+msg;
+  t.style.background=err?'rgba(100,20,20,0.96)':'var(--navy-600)';
+  t.classList.add('show');
+  clearTimeout(toastT);
+  toastT=setTimeout(()=>t.classList.remove('show'),2800);
+}
+
+function changeMonth(d){currentMonth+=d;if(currentMonth<0){currentMonth=11;currentYear--;}if(currentMonth>11){currentMonth=0;currentYear++;}render();}
+
+function openModal(key,date,tr){
+  selectedKey=key;
+  const done=completedDays[key];
+  document.getElementById('modalDate').textContent=date.toLocaleDateString('en-US',{weekday:'long',year:'numeric',month:'long',day:'numeric'});
+  const t=document.getElementById('modalTitle');t.textContent=tr.name;t.className='modal-title '+tr.type;
+  document.getElementById('modalBand').className='modal-band '+tr.type;
+  let body='<div class="modal-section"><div class="modal-label">Session overview</div><div class="modal-desc">'+tr.desc+'</div></div>';
+  if(tr.type==='interval'&&tr.reps){
+    body+='<div class="modal-section"><div class="modal-label">Structure</div><div class="interval-steps">';
+    let ivCount=0;
+    tr.reps.forEach((rep)=>{
+      if(rep.isWarmup){
+        body+='<div class="interval-rep" style="border-color:rgba(52,211,153,0.25);background:rgba(52,211,153,0.06);">';
+        body+='<div class="rep-num" style="color:#34d399;font-size:12px;font-family:Outfit,sans-serif;font-weight:800;">WU</div><div class="rep-divider"></div>';
+        body+='<div class="rep-info"><div class="rep-work" style="color:#34d399;">'+rep.work+'</div><div class="rep-rest">'+rep.rest+'</div></div></div>';
+      } else if(rep.isCooldown){
+        body+='<div class="interval-rep" style="border-color:rgba(129,140,248,0.25);background:rgba(129,140,248,0.06);">';
+        body+='<div class="rep-num" style="color:#818cf8;font-size:12px;font-family:Outfit,sans-serif;font-weight:800;">CD</div><div class="rep-divider"></div>';
+        body+='<div class="rep-info"><div class="rep-work" style="color:#818cf8;">'+rep.work+'</div><div class="rep-rest">'+rep.rest+'</div></div></div>';
+      } else {
+        ivCount++;
+        body+='<div class="interval-rep"><div class="rep-num">'+ivCount+'</div><div class="rep-divider"></div><div class="rep-info"><div class="rep-work">'+rep.work+'</div><div class="rep-rest">Rest: '+rep.rest+'</div></div></div>';
+      }
+    });
+    body+='</div></div>';
+  }
+  if(tr.type==='race'&&tr.distance) body+='<div class="modal-section"><div class="modal-label">Distance</div><div class="duration-badge">📏 '+tr.distance+'</div></div>';
+  if(tr.duration||tr.targetKm) body+='<div class="modal-section"><div class="modal-label">Target</div><div class="duration-badge">⏱ '+(tr.targetKm?tr.targetKm+' km':tr.duration)+'</div></div>';
+  body+='<div class="modal-section"><div class="modal-label">Notes</div><textarea class="modal-comment" id="commentInput" placeholder="Add notes, pace, how you felt&#8230;">'+(comments[key]||'')+'</textarea></div>';
+  document.getElementById('modalBody').innerHTML=body;
+  let acts='';
+  if(done)acts+='<button class="btn btn-uncomplete" onclick="toggleDone(\''+key+'\',false)">&#8617; Mark incomplete</button>';
+  else acts+='<button class="btn btn-complete" onclick="toggleDone(\''+key+'\',true)">&#10003; Mark complete</button>';
+  acts+='<button class="btn btn-close" onclick="saveAndClose()">Save &amp; close</button>';
+  acts+='<button class="btn btn-remove" onclick="removeEvent(\''+key+'\')">&#128465; Remove</button>';
+  document.getElementById('modalActions').innerHTML=acts;
+  document.getElementById('modalOverlay').classList.add('open');
+}
+
+function saveComment(){if(!selectedKey)return;const inp=document.getElementById('commentInput');if(inp){const v=inp.value.trim();if(v)comments[selectedKey]=v;else delete comments[selectedKey];}save();}
+function saveAndClose(){saveComment();closeModal();render();}
+function toggleDone(key,val){saveComment();if(val)completedDays[key]=true;else delete completedDays[key];save();closeModal();render();}
+function closeModal(){document.getElementById('modalOverlay').classList.remove('open');selectedKey=null;}
+function closeModalOutside(e){if(e.target===document.getElementById('modalOverlay'))saveAndClose();}
+function removeEvent(key){delete schedule[key];delete completedDays[key];delete comments[key];save();closeModal();render();showToast('Session removed');}
+
+// ─── ADD EVENT ────────────────────────────────────────────────────────────────
+let addKey=null, addDate=null;
+
+function openAddModal(key,date){
+  addKey=key; addDate=date;
+  document.getElementById('modalDate').textContent=date.toLocaleDateString('en-US',{weekday:'long',year:'numeric',month:'long',day:'numeric'});
+  const t=document.getElementById('modalTitle'); t.textContent='Add Session'; t.className='modal-title';
+  t.style.cssText='color:var(--text);font-size:26px;';
+  document.getElementById('modalBand').className='modal-band'; document.getElementById('modalBand').style.background='linear-gradient(90deg,var(--sky),#6366f1)';
+  renderTypePicker();
+  document.getElementById('modalActions').innerHTML='<button class="btn btn-close" onclick="closeModal()">Cancel</button>';
+  document.getElementById('modalOverlay').classList.add('open');
+}
+
+function renderTypePicker(){
+  document.getElementById('modalBody').innerHTML=`
+    <div class="modal-section"><div class="modal-label">Choose session type</div>
+    <div class="type-picker">
+      <div class="type-option easy" onclick="addEasy()">
+        <div class="type-icon">🟢</div>
+        <div class="type-info"><div class="type-name">Easy Run</div><div class="type-sub">30–45 min · Zone 2</div></div>
+        <div class="type-arrow">›</div>
+      </div>
+      <div class="type-option long" onclick="renderLongRunPicker()">
+        <div class="type-icon">🔵</div>
+        <div class="type-info"><div class="type-name">Long Run</div><div class="type-sub">1–2 hours · Zone 2 · set target km</div></div>
+        <div class="type-arrow">›</div>
+      </div>
+      <div class="type-option interval" onclick="renderIntervalPicker()">
+        <div class="type-icon">🟠</div>
+        <div class="type-info"><div class="type-name">Interval Session</div><div class="type-sub">Preset or build your own</div></div>
+        <div class="type-arrow">›</div>
+      </div>
+      <div class="type-option race" onclick="addRaceDay()">
+        <div class="type-icon">🏁</div>
+        <div class="type-info"><div class="type-name">Race Day</div><div class="type-sub">Mark a race on your calendar</div></div>
+        <div class="type-arrow">›</div>
+      </div>
+    </div></div>`;
+}
+
+function renderLongRunPicker(){
+  document.getElementById('modalBody').innerHTML=`
+    <button class="back-btn" onclick="renderTypePicker()">&#8592; Back</button>
+    <div class="modal-section">
+      <div class="modal-label">Long Run</div>
+      <div class="custom-builder">
+        <div class="builder-field">
+          <div class="builder-label">Target distance (optional)</div>
+          <div style="display:flex;align-items:center;gap:10px;">
+            <input class="builder-input" id="longKm" type="number" min="1" max="100" placeholder="e.g. 20" style="width:100px;text-align:center;font-size:18px;font-weight:700;">
+            <span style="color:var(--text-muted);font-size:15px;font-weight:600;">km</span>
+          </div>
+          <div style="font-size:12px;color:var(--text-dim);margin-top:6px;">Leave empty for an open-ended long run</div>
+        </div>
+      </div>
+    </div>
+    <button class="btn btn-complete" onclick="addLongRun()" style="margin-top:8px;width:100%;">Add Long Run</button>`;
+}
+
+function renderIntervalPicker(){
+  let html='<button class="back-btn" onclick="renderTypePicker()">&#8592; Back</button>';
+  html+='<div class="modal-section"><div class="modal-label">Choose interval session</div><div class="interval-picker">';
+  // Custom at the top
+  html+=`<div class="interval-option" style="border-color:rgba(56,189,248,0.25);" onclick="renderQuickBuilder()">
+    <div><div class="interval-option-name" style="color:var(--sky);">✏️ Custom session</div><div class="interval-option-desc">Build your own — mix any times or distances</div></div>
+    <div style="color:var(--text-dim);font-size:16px;">›</div>
+  </div>`;
+  INTERVALS.forEach(iv=>{
+    html+=`<div class="interval-option" onclick="addInterval(${iv.id})">
+      <div><div class="interval-option-name">${iv.name}</div><div class="interval-option-desc">${iv.desc.substring(0,60)}…</div></div>
+      <div style="color:var(--text-dim);font-size:16px;">›</div>
+    </div>`;
+  });
+  html+='</div></div>';
+  document.getElementById('modalBody').innerHTML=html;
+}
+
+// ─── CUSTOM INTERVAL BUILDER ─────────────────────────────────────────────────
+let qbMode = 'custom';
+let qbCustomRows = [{work:'', rest:''}];
+
+function renderQuickBuilder(mode){
+  if(mode) qbMode = mode;
+  const isTime = qbMode === 'uniform-time';
+  const isDist = qbMode === 'uniform-dist';
+  const isCustom = qbMode === 'custom';
+
+  const modeBtn = (m, label) => {
+    const a = qbMode === m;
+    return `<button onclick="renderQuickBuilder('${m}')" style="flex:1;padding:8px 4px;border-radius:9px;border:1.5px solid ${a?'var(--interval)':'var(--border)'};background:${a?'var(--interval-bg)':'transparent'};color:${a?'var(--interval)':'var(--text-muted)'};font-family:'Outfit',sans-serif;font-size:12px;font-weight:${a?700:500};cursor:pointer;transition:all 0.15s;">${label}</button>`;
+  };
+
+  let fieldsHtml = '';
+  if(isTime){
+    fieldsHtml = `
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;">
+        <div class="builder-field"><div class="builder-label">Reps</div>
+          <input class="builder-input" id="qbReps" type="number" min="1" max="40" placeholder="6" style="text-align:center;font-size:22px;font-weight:800;" oninput="qbPreview()"></div>
+        <div class="builder-field"><div class="builder-label">Work (min each)</div>
+          <div style="display:flex;align-items:center;gap:5px;">
+            <input class="builder-input" id="qbWork" type="number" min="0.5" step="0.5" placeholder="5" style="text-align:center;font-size:22px;font-weight:800;" oninput="qbPreview()">
+            <span style="color:var(--text-muted);font-size:12px;">min</span></div></div>
+        <div class="builder-field"><div class="builder-label">Rest (min)</div>
+          <div style="display:flex;align-items:center;gap:5px;">
+            <input class="builder-input" id="qbRest" type="number" min="0" step="0.5" placeholder="1" style="text-align:center;font-size:22px;font-weight:800;" oninput="qbPreview()">
+            <span style="color:var(--text-muted);font-size:12px;">min</span></div></div>
+      </div>`;
+  } else if(isDist){
+    fieldsHtml = `
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;">
+        <div class="builder-field"><div class="builder-label">Reps</div>
+          <input class="builder-input" id="qbReps" type="number" min="1" max="40" placeholder="4" style="text-align:center;font-size:22px;font-weight:800;" oninput="qbPreview()"></div>
+        <div class="builder-field"><div class="builder-label">Distance (m)</div>
+          <div style="display:flex;align-items:center;gap:5px;">
+            <input class="builder-input" id="qbWork" type="number" min="100" step="100" placeholder="1000" style="text-align:center;font-size:22px;font-weight:800;" oninput="qbPreview()">
+            <span style="color:var(--text-muted);font-size:12px;">m</span></div></div>
+        <div class="builder-field"><div class="builder-label">Rest (min)</div>
+          <div style="display:flex;align-items:center;gap:5px;">
+            <input class="builder-input" id="qbRest" type="number" min="0" step="0.5" placeholder="2" style="text-align:center;font-size:22px;font-weight:800;" oninput="qbPreview()">
+            <span style="color:var(--text-muted);font-size:12px;">min</span></div></div>
+      </div>`;
+  } else {
+    let rows = '';
+    qbCustomRows.forEach((r,i) => {
+      rows += `<div class="rep-row" id="crow-${i}">
+        <span style="font-size:13px;font-weight:700;color:var(--interval);min-width:20px;text-align:center;">${i+1}</span>
+        <input class="builder-input" placeholder="e.g. 2 min, 1000m" value="${r.work}" oninput="qbCustomRows[${i}].work=this.value;qbPreview()" style="font-size:13px;padding:8px 10px;user-select:text;">
+        <input class="builder-input" placeholder="e.g. 1 min, 90s" value="${r.rest}" oninput="qbCustomRows[${i}].rest=this.value" style="font-size:13px;padding:8px 10px;user-select:text;">
+        <button class="rep-delete" onclick="qbDeleteRow(${i})">✕</button>
+      </div>`;
+    });
+    fieldsHtml = `
+      <div class="builder-field">
+        <div class="builder-label">Each row = one interval — mix times, distances freely</div>
+        <div style="display:grid;grid-template-columns:20px 1fr 1fr 32px;gap:8px;margin-bottom:6px;padding:0 2px;">
+          <span></span>
+          <span style="font-size:10px;font-weight:700;letter-spacing:1px;color:var(--text-dim);text-transform:uppercase;">Work</span>
+          <span style="font-size:10px;font-weight:700;letter-spacing:1px;color:var(--text-dim);text-transform:uppercase;">Rest</span>
+          <span></span>
+        </div>
+        <div class="reps-list" id="customRowsList">${rows}</div>
+        <button class="add-rep-btn" onclick="qbAddRow()" style="margin-top:8px;">+ Add interval</button>
+      </div>`;
+  }
+
+  document.getElementById('modalBody').innerHTML = `
+    <button class="back-btn" onclick="renderIntervalPicker()">&#8592; Back</button>
+    <div class="modal-section">
+      <div class="modal-label">Custom interval builder</div>
+      <div class="custom-builder">
+        <div class="builder-field">
+          <div class="builder-label">Session name (optional)</div>
+          <input class="builder-input" id="qbName" type="text" placeholder="e.g. 4×1000m / 2min" style="user-select:text;">
+        </div>
+        <div class="builder-field">
+          <div class="builder-label">Mode</div>
+          <div style="display:flex;gap:6px;">
+            ${modeBtn('custom','✏️ Custom')}
+            ${modeBtn('uniform-time','⏱ Time-based')}
+            ${modeBtn('uniform-dist','📏 Distance-based')}
+          </div>
+        </div>
+        ${fieldsHtml}
+        <div id="qbPreview" style="background:var(--card2);border:1px solid var(--border);border-radius:10px;padding:11px 14px;font-size:13px;color:var(--text-muted);min-height:40px;line-height:1.6;"></div>
+      </div>
+    </div>
+    <button class="btn btn-complete" onclick="saveQuickInterval()" style="margin-top:4px;width:100%;">Add to calendar</button>`;
+  document.getElementById('modalActions').innerHTML = '<button class="btn btn-close" onclick="closeModal()">Cancel</button>';
+  qbPreview();
+}
+
+function qbAddRow(){
+  // sync current values first
+  document.querySelectorAll('#customRowsList .rep-row').forEach((row,i)=>{
+    const inputs=row.querySelectorAll('input');
+    if(inputs[0]) qbCustomRows[i]={work:inputs[0].value,rest:inputs[1]?inputs[1].value:''};
+  });
+  qbCustomRows.push({work:'',rest:''});
+  renderQuickBuilder('custom');
+}
+function qbDeleteRow(i){
+  if(qbCustomRows.length<=1) return;
+  qbCustomRows.splice(i,1);
+  renderQuickBuilder('custom');
+}
+
+function qbPreview(){
+  const el = document.getElementById('qbPreview');
+  if(!el) return;
+  if(qbMode==='uniform-time'){
+    const n=parseInt(document.getElementById('qbReps')?.value)||0;
+    const w=parseFloat(document.getElementById('qbWork')?.value)||0;
+    const r=parseFloat(document.getElementById('qbRest')?.value)||0;
+    if(!n||!w){el.textContent='Fill in reps and work time to preview…';return;}
+    el.innerHTML=`<span style="color:var(--interval);font-weight:700;">${n} × ${w} min</span> · <span style="color:var(--text-muted);">${r?r+' min rest':'no rest'}</span> — approx. <b style="color:var(--text);">${Math.round(n*(w+r))} min total</b>`;
+  } else if(qbMode==='uniform-dist'){
+    const n=parseInt(document.getElementById('qbReps')?.value)||0;
+    const d=parseFloat(document.getElementById('qbWork')?.value)||0;
+    const r=parseFloat(document.getElementById('qbRest')?.value)||0;
+    if(!n||!d){el.textContent='Fill in reps and distance to preview…';return;}
+    const lbl=d>=1000?(d/1000)+'km':d+'m';
+    el.innerHTML=`<span style="color:var(--interval);font-weight:700;">${n} × ${lbl}</span> · <span style="color:var(--text-muted);">${r?r+' min rest':'no rest'}</span>`;
+  } else {
+    const filled=qbCustomRows.filter(r=>r.work.trim());
+    if(!filled.length){el.textContent='Add at least one interval above…';return;}
+    el.innerHTML=filled.map((r,i)=>`<span style="color:var(--interval);font-weight:600;">${i+1}. ${r.work}</span>${r.rest?' <span style="color:var(--text-muted);">· rest: '+r.rest+'</span>':''}`).join(' &nbsp;|&nbsp; ');
+  }
+}
+
+function saveQuickInterval(){
+  const rawName=(document.getElementById('qbName')?.value||'').trim();
+  let reps=[],name='',detail='',desc='';
+  if(qbMode==='uniform-time'){
+    const n=parseInt(document.getElementById('qbReps')?.value)||0;
+    const w=parseFloat(document.getElementById('qbWork')?.value)||0;
+    const r=parseFloat(document.getElementById('qbRest')?.value)||0;
+    if(!n||!w){showToast('Fill in reps and work time',true);return;}
+    name=rawName||`${n} × ${w} min`;
+    detail=`${n}×${w}min · intervals`;
+    desc=`${n} repetitions of ${w} minutes at hard effort${r?', '+r+' min rest':'.'}.`;
+    reps=Array(n).fill(null).map(()=>({work:`${w} min hard`,rest:r?`${r} min easy`:'—'}));
+  } else if(qbMode==='uniform-dist'){
+    const n=parseInt(document.getElementById('qbReps')?.value)||0;
+    const d=parseFloat(document.getElementById('qbWork')?.value)||0;
+    const r=parseFloat(document.getElementById('qbRest')?.value)||0;
+    if(!n||!d){showToast('Fill in reps and distance',true);return;}
+    const lbl=d>=1000?(d/1000)+'km':d+'m';
+    name=rawName||`${n} × ${lbl}`;
+    detail=`${n}×${lbl} · intervals`;
+    desc=`${n} repetitions of ${lbl}${r?', '+r+' min rest':'.'}.`;
+    reps=Array(n).fill(null).map(()=>({work:lbl,rest:r?`${r} min easy`:'—'}));
+  } else {
+    document.querySelectorAll('#customRowsList .rep-row').forEach((row,i)=>{
+      const inputs=row.querySelectorAll('input');
+      if(inputs[0]) qbCustomRows[i]={work:inputs[0].value.trim(),rest:inputs[1]?inputs[1].value.trim():''};
+    });
+    const filled=qbCustomRows.filter(r=>r.work.trim());
+    if(!filled.length){showToast('Add at least one interval',true);return;}
+    name=rawName||`Custom · ${filled.length} intervals`;
+    detail=`${filled.length} intervals · custom`;
+    desc=`Custom mixed session: ${filled.map(r=>r.work).join(', ')}.`;
+    reps=filled.map(r=>({work:r.work,rest:r.rest||'—'}));
+  }
+  schedule[addKey]={type:'interval',name,detail,desc,reps:withWU(reps)};
+  qbCustomRows=[{work:'',rest:''}];
+  qbMode='custom';
+  save();closeModal();render();
+  showToast(name+' added');
+}
+
+function addEasy(){
+  schedule[addKey]={type:'easy',name:'Easy Run',detail:'30–45 min zone 2',desc:'Easy aerobic run keeping heart rate in zone 2. Conversational pace. Focus on time on feet, not speed.',duration:'30–45 min'};
+  save();closeModal();render();showToast('Easy Run added');
+}
+
+function addLongRun(){
+  const kmEl=document.getElementById('longKm');
+  const km=kmEl?parseFloat(kmEl.value)||null:null;
+  const detail=km?km+'km · zone 2':'1–2 h zone 2';
+  const name=km?'Long Run · '+km+'km':'Long Run';
+  const desc='Long aerobic run in zone 2. Builds endurance and fat adaptation. Bring fluids for runs over 75 min.'+(km?' Target: '+km+' km.':'');
+  schedule[addKey]={type:'long',name,detail,desc,duration:km?km+' km':'1–2 hours',targetKm:km||null};
+  save();closeModal();render();showToast(name+' added');
+}
+
+function addRaceDay(){
+  document.getElementById('modalBody').innerHTML=`
+    <button class="back-btn" onclick="renderTypePicker()">&#8592; Back</button>
+    <div class="modal-section">
+      <div class="modal-label">Race Day</div>
+      <div class="custom-builder">
+        <div class="builder-field">
+          <div class="builder-label">Race name</div>
+          <input class="builder-input" id="raceName" type="text" placeholder="e.g. Stockholm Marathon">
+        </div>
+        <div class="builder-field">
+          <div class="builder-label">Distance</div>
+          <input class="builder-input" id="raceDist" type="text" placeholder="e.g. 10km, Half Marathon, 42.2km">
+        </div>
+      </div>
+    </div>
+    <button class="btn" onclick="saveRaceDay()" style="margin-top:8px;width:100%;background:linear-gradient(135deg,#ff4757,#ff6b35);color:#fff;border-color:transparent;box-shadow:0 4px 20px rgba(255,71,87,0.4);font-weight:700;padding:14px;">🏁 Add Race Day</button>`;
+  document.getElementById('modalActions').innerHTML='<button class="btn btn-close" onclick="closeModal()">Cancel</button>';
+}
+
+function saveRaceDay(){
+  const nameEl=document.getElementById('raceName');
+  const distEl=document.getElementById('raceDist');
+  const name=(nameEl&&nameEl.value.trim())||'Race Day';
+  const dist=(distEl&&distEl.value.trim())||'';
+  const detail=dist?dist+' · Race':'Race Day';
+  const desc='Race day! All your training has been building to this. Trust your preparation, run your race.';
+  schedule[addKey]={type:'race',name,detail,desc,distance:dist};
+  save();closeModal();render();showToast('🏁 '+name+' added!');
+}
+
+function addInterval(id){
+  const iv=INTERVALS[id-1];
+  schedule[addKey]={type:'interval',name:iv.name,detail:iv.shortName+' intervals',desc:iv.desc,reps:withWU(iv.reps)};
+  save(); closeModal(); render();
+  showToast(iv.name+' added');
+}
+
+render();
+</script>
+</body>
+</html>
