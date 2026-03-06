@@ -17,6 +17,7 @@
 </script>
 <link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='22' fill='%23060d1f'/><text y='.9em' font-size='72' x='50%' text-anchor='middle'>🏃</text></svg>">
 <title>Run Plan</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.3/dist/umd/supabase.min.js"></script>
 <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
 <style>
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -335,13 +336,55 @@
     .interval-option:active { transform:translateX(4px); }
     .day-cell:active { transform:scale(0.98); }
   }
+
+  /* ── AUTH ── */
+  #authScreen{position:fixed;inset:0;background:var(--bg);z-index:1000;display:flex;align-items:center;justify-content:center;padding:24px;}
+  .auth-box{background:var(--card);border:1px solid var(--border-hover);border-radius:24px;padding:40px 36px;width:100%;max-width:400px;box-shadow:0 40px 100px rgba(0,0,0,0.5);}
+  .auth-logo{font-size:48px;text-align:center;margin-bottom:16px;}
+  .auth-title{font-family:'Playfair Display',serif;font-size:28px;font-weight:700;text-align:center;background:linear-gradient(135deg,#e8edf8,var(--accent));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-bottom:6px;}
+  .auth-sub{font-size:13px;color:var(--text-muted);text-align:center;margin-bottom:32px;}
+  .auth-tabs{display:flex;background:var(--card2);border-radius:12px;padding:4px;margin-bottom:28px;gap:4px;}
+  .auth-tab{flex:1;padding:10px;border:none;background:transparent;color:var(--text-muted);font-family:'Outfit',sans-serif;font-size:14px;font-weight:600;border-radius:9px;cursor:pointer;transition:all 0.18s;}
+  .auth-tab.active{background:var(--card3);color:var(--text);}
+  .auth-field{margin-bottom:16px;}
+  .auth-label{font-size:11px;font-weight:700;letter-spacing:1.2px;color:var(--text-dim);text-transform:uppercase;display:block;margin-bottom:7px;}
+  .auth-input{width:100%;background:var(--card2);border:1px solid var(--border);border-radius:12px;padding:13px 15px;color:var(--text);font-family:'Outfit',sans-serif;font-size:16px;outline:none;transition:border-color 0.2s;-webkit-appearance:none;}
+  .auth-input:focus{border-color:rgba(56,189,248,0.5);}
+  .auth-input::placeholder{color:var(--text-dim);}
+  .auth-btn{width:100%;padding:14px;border-radius:12px;border:none;margin-top:8px;background:linear-gradient(135deg,var(--accent),#6366f1);color:#fff;font-family:'Outfit',sans-serif;font-size:15px;font-weight:700;cursor:pointer;transition:all 0.18s;}
+  .auth-btn:disabled{opacity:0.6;cursor:not-allowed;}
+  .auth-error{background:rgba(248,113,113,0.1);border:1px solid rgba(248,113,113,0.3);border-radius:10px;padding:10px 14px;font-size:13px;color:#f87171;margin-bottom:16px;display:none;}
+  .auth-error.show{display:block;}
+  .user-bar{display:flex;align-items:center;justify-content:flex-end;gap:10px;margin-bottom:16px;}
+  .user-email{font-size:12px;color:var(--text-muted);}
+  .sign-out-btn{background:transparent;border:1px solid var(--border);border-radius:8px;color:var(--text-muted);font-family:'Outfit',sans-serif;font-size:12px;font-weight:500;padding:5px 12px;cursor:pointer;}
+  .sync-indicator{font-size:11px;color:var(--text-dim);display:flex;align-items:center;gap:5px;}
+  .sync-dot{width:6px;height:6px;border-radius:50%;background:#22c55e;flex-shrink:0;}
+  .sync-dot.syncing{background:var(--accent);animation:pulse 1s ease-in-out infinite;}
+  .sync-dot.error{background:#f87171;}
 </style>
 </head>
 <body>
+<div id="authScreen">
+  <div class="auth-box">
+    <div class="auth-logo">🏃</div>
+    <div class="auth-title">Run Plan</div>
+    <div class="auth-sub">Your personal training calendar</div>
+    <div class="auth-tabs">
+      <button class="auth-tab active" onclick="switchAuthTab('login')">Sign in</button>
+      <button class="auth-tab" onclick="switchAuthTab('signup')">Create account</button>
+    </div>
+    <div class="auth-error" id="authError"></div>
+    <div class="auth-field"><label class="auth-label">Email</label><input class="auth-input" id="authEmail" type="email" placeholder="you@example.com" autocomplete="email"></div>
+    <div class="auth-field"><label class="auth-label">Password</label><input class="auth-input" id="authPassword" type="password" placeholder="••••••••" autocomplete="current-password"></div>
+    <button class="auth-btn" id="authBtn" onclick="handleAuth()">Sign in</button>
+  </div>
+</div>
 <div class="bg-layer"></div>
 <div id="dragGhost"></div>
 
 <div class="app">
+  <div class="user-bar" id="userBar" style="display:none;"><div class="sync-indicator"><div class="sync-dot" id="syncDot"></div><span id="syncLabel">Synced</span></div><span class="user-email" id="userEmail"></span><button class="sign-out-btn" onclick="signOut()">Sign out</button></div>
   <div class="header">
     <div class="brand">
       <div class="brand-icon">🏃</div>
@@ -458,28 +501,171 @@ function buildSchedule(){
 }
 
 const TODAY=new Date(2026,2,5);
-// ─── STATE ───────────────────────────────────────────────────────────────────
+// ─── SUPABASE SETUP ──────────────────────────────────────────────────────────
+const SUPA_URL = 'https://xaqmzibacuflpvjkzuuz.supabase.co';
+const SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhhcW16aWJhY3VmbHB2amt6dXV6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI3MTkzNzMsImV4cCI6MjA4ODI5NTM3M30.cSnw8KbO-SsPlD5NwhHmrOfLnq9nZoLs4VfXal8m9Is';
+
+// Use plain fetch for all DB calls — avoids Supabase JS client lock issues
+async function dbGet(userId){
+  const session = (await supa.auth.getSession()).data.session;
+  const token = session?.access_token || SUPA_KEY;
+  const res = await fetch(SUPA_URL+'/rest/v1/user_data?user_id=eq.'+userId+'&select=*', {
+    headers:{'apikey':SUPA_KEY,'Authorization':'Bearer '+token},
+    signal: AbortSignal.timeout(8000)
+  });
+  if(!res.ok) throw new Error('GET failed: '+res.status);
+  return await res.json();
+}
+
+async function dbSave(userId, payload){
+  const session = (await supa.auth.getSession()).data.session;
+  const token = session?.access_token || SUPA_KEY;
+  const res = await fetch(SUPA_URL+'/rest/v1/user_data', {
+    method:'POST',
+    headers:{
+      'apikey':SUPA_KEY,
+      'Authorization':'Bearer '+token,
+      'Content-Type':'application/json',
+      'Prefer':'resolution=merge-duplicates,return=minimal'
+    },
+    body: JSON.stringify(payload),
+    signal: AbortSignal.timeout(8000)
+  });
+  if(!res.ok) throw new Error('SAVE failed: '+res.status);
+}
+
+// Supabase client — only used for auth, not DB calls
+const supa = supabase.createClient(SUPA_URL, SUPA_KEY, {
+  auth: {
+    persistSession: true,
+    autoRefreshToken: true,
+    detectSessionInUrl: false,
+    lock: (name, acquireTimeout, fn) => fn()
+  }
+});
+
+let currentUser = null;
 let schedule={}, completedDays={}, comments={};
+let syncTimeout = null;
+
+// ─── AUTH FUNCTIONS ───────────────────────────────────────────────────────────
+let authMode = 'login';
+
+function switchAuthTab(mode){
+  authMode = mode;
+  document.querySelectorAll('.auth-tab').forEach((t,i)=>t.classList.toggle('active',(mode==='login'?i===0:i===1)));
+  document.getElementById('authBtn').textContent = mode==='login'?'Sign in':'Create account';
+  document.getElementById('authError').classList.remove('show');
+}
+
+function showAuthError(msg){
+  const el=document.getElementById('authError');
+  el.textContent=msg; el.classList.add('show');
+}
+
+async function handleAuth(){
+  const email=document.getElementById('authEmail').value.trim();
+  const password=document.getElementById('authPassword').value;
+  const btn=document.getElementById('authBtn');
+  if(!email||!password){showAuthError('Please enter email and password.');return;}
+  btn.disabled=true; btn.textContent='Please wait…';
+  document.getElementById('authError').classList.remove('show');
+  try{
+    let result;
+    if(authMode==='login'){
+      result=await supa.auth.signInWithPassword({email,password});
+    } else {
+      result=await supa.auth.signUp({email,password});
+      if(!result.error && result.data.user && !result.data.session){
+        btn.disabled=false; btn.textContent='Create account';
+        showAuthError('Check your email for a confirmation link, then sign in.');
+        return;
+      }
+    }
+    if(result.error){showAuthError(result.error.message);btn.disabled=false;btn.textContent=authMode==='login'?'Sign in':'Create account';}
+  }catch(e){showAuthError('Something went wrong. Try again.');btn.disabled=false;btn.textContent=authMode==='login'?'Sign in':'Create account';}
+}
+
+document.addEventListener('keydown',function(e){
+  const as=document.getElementById('authScreen');
+  if(e.key==='Enter'&&as&&as.style.display!=='none') handleAuth();
+});
+
+async function signOut(){
+  await supa.auth.signOut();
+  currentUser=null;
+  document.getElementById('authScreen').style.display='flex';
+  document.getElementById('userBar').style.display='none';
+  schedule={}; completedDays={}; comments={};
+}
+
+// ─── SYNC ─────────────────────────────────────────────────────────────────────
+function setSyncing(state){
+  const dot=document.getElementById('syncDot');
+  const lbl=document.getElementById('syncLabel');
+  if(!dot||!lbl)return;
+  dot.className='sync-dot'+(state==='syncing'?' syncing':state==='error'?' error':'');
+  lbl.textContent=state==='syncing'?'Saving…':state==='error'?'Offline':'Synced';
+}
+
+async function loadFromCloud(){
+  if(!currentUser)return;
+  setSyncing('syncing');
+  try{
+    const rows = await dbGet(currentUser.id);
+    if(rows && rows.length){
+      try{schedule=JSON.parse(rows[0].schedule||'{}');}catch(e){schedule={};}
+      try{completedDays=JSON.parse(rows[0].completed||'{}');}catch(e){completedDays={};}
+      try{comments=JSON.parse(rows[0].comments||'{}');}catch(e){comments={};}
+    }
+    if(!schedule||!Object.keys(schedule).length){
+      schedule=buildSchedule(); completedDays={}; comments={};
+      await saveToCloud();
+    }
+    setSyncing('ok');
+  }catch(e){
+    console.warn('Load failed:',e.message);
+    setSyncing('error');
+  }
+  render();
+}
+
+async function saveToCloud(){
+  if(!currentUser)return;
+  try{
+    await dbSave(currentUser.id, {
+      user_id: currentUser.id,
+      schedule: JSON.stringify(schedule),
+      completed: JSON.stringify(completedDays),
+      comments: JSON.stringify(comments),
+      updated_at: new Date().toISOString()
+    });
+    setSyncing('ok');
+  }catch(e){
+    console.warn('Save failed:',e.message);
+    setSyncing('error');
+  }
+}
 
 function save(){
-  try{
-    localStorage.setItem('rp_sched_v2', JSON.stringify(schedule));
-    localStorage.setItem('rp_done', JSON.stringify(completedDays));
-    localStorage.setItem('rp_notes', JSON.stringify(comments));
-  }catch(e){}
+  clearTimeout(syncTimeout);
+  syncTimeout = setTimeout(()=>saveToCloud(), 800);
 }
 
-function load(){
-  try{
-    const sv = localStorage.getItem('rp_sched_v2');
-    if(sv) schedule = JSON.parse(sv);
-    else schedule = buildSchedule();
-  }catch(e){ schedule = buildSchedule(); }
-  try{ completedDays = JSON.parse(localStorage.getItem('rp_done')||'{}'); }catch(e){}
-  try{ comments = JSON.parse(localStorage.getItem('rp_notes')||'{}'); }catch(e){}
-}
-
-load();
+// ─── AUTH LISTENER ────────────────────────────────────────────────────────────
+supa.auth.onAuthStateChange(async (event, session)=>{
+  if(session?.user){
+    currentUser=session.user;
+    document.getElementById('authScreen').style.display='none';
+    document.getElementById('userBar').style.display='flex';
+    document.getElementById('userEmail').textContent=currentUser.email;
+    await loadFromCloud();
+  } else {
+    currentUser=null;
+    document.getElementById('authScreen').style.display='flex';
+    document.getElementById('userBar').style.display='none';
+  }
+});
 
 let currentYear=2026,currentMonth=2,selectedKey=null;
 
